@@ -141,13 +141,22 @@ export const FileProxyForm = ({ onSubmit, isLoading }: FileProxyFormProps) => {
 
         {name && path && (
           <div className="bg-muted p-4 rounded-lg">
-            <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+            <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
               <Folder className="w-4 h-4" />
-              Generated URL Preview
+              Matched Files
             </h4>
-            <code className="text-xs break-all bg-background px-2 py-1 rounded border">
-              https://storage.googleapis.com/{name}-static-files/{path}
-            </code>
+            <div className="space-y-2">
+              <div className="text-xs text-muted-foreground mb-2">
+                Files matching pattern: <code className="bg-background px-1 py-0.5 rounded">{path}</code>
+              </div>
+              <div className="bg-background rounded border p-3 max-h-32 overflow-y-auto">
+                <div className="text-xs text-muted-foreground text-center py-2">
+                  File listing requires server-side access to bucket contents.
+                  <br />
+                  Connect Supabase to enable private bucket file discovery.
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

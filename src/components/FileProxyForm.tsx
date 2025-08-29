@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Globe, Folder } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, Globe, Folder, Plus } from "lucide-react";
 import type { ProxyRequest } from "@/pages/Index";
 
 interface FileProxyFormProps {
@@ -15,6 +16,17 @@ interface FileProxyFormProps {
 export const FileProxyForm = ({ onSubmit, isLoading }: FileProxyFormProps) => {
   const [name, setName] = useState("");
   const [path, setPath] = useState("");
+  const [isCustomBucket, setIsCustomBucket] = useState(false);
+
+  // Predefined bucket options
+  const predefinedBuckets = [
+    "project-dev",
+    "project-staging", 
+    "project-prod",
+    "my-app",
+    "web-assets",
+    "static-content"
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,18 +54,66 @@ export const FileProxyForm = ({ onSubmit, isLoading }: FileProxyFormProps) => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="name" className="text-sm font-medium">
+          <Label className="text-sm font-medium">
             Bucket Name Identifier
           </Label>
-          <Input
-            id="name"
-            type="text"
-            placeholder="e.g., project-dev, my-app"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            disabled={isLoading}
-            className="w-full"
-          />
+          {!isCustomBucket ? (
+            <div className="space-y-2">
+              <Select 
+                value={name} 
+                onValueChange={(value) => {
+                  if (value === "custom") {
+                    setIsCustomBucket(true);
+                    setName("");
+                  } else {
+                    setName(value);
+                  }
+                }}
+                disabled={isLoading}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a bucket or add custom..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {predefinedBuckets.map((bucket) => (
+                    <SelectItem key={bucket} value={bucket}>
+                      {bucket}
+                    </SelectItem>
+                  ))}
+                  <Separator />
+                  <SelectItem value="custom">
+                    <div className="flex items-center gap-2">
+                      <Plus className="w-4 h-4" />
+                      Add custom bucket...
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Input
+                type="text"
+                placeholder="Enter custom bucket name..."
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={isLoading}
+                className="w-full"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setIsCustomBucket(false);
+                  setName("");
+                }}
+                className="text-xs"
+              >
+                ← Back to predefined buckets
+              </Button>
+            </div>
+          )}
           <p className="text-xs text-muted-foreground">
             This will be mapped to: <code className="bg-muted px-1 py-0.5 rounded text-xs">{name || 'name'}-static-files</code>
           </p>

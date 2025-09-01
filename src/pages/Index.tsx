@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileProxyForm } from "@/components/FileProxyForm";
 import { ContentViewer } from "@/components/ContentViewer";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +20,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [fetchedContent, setFetchedContent] = useState<FetchedContent | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("request");
   const { toast } = useToast();
 
   const handleProxyRequest = async (request: ProxyRequest) => {
@@ -49,6 +51,7 @@ const Index = () => {
       };
 
       setFetchedContent(result);
+      setActiveTab("content"); // Auto-switch to content tab
       toast({
         title: "Content loaded successfully",
         description: `Fetched ${request.path} from ${bucketName}`,
@@ -69,7 +72,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-subtle">
       <div className="container mx-auto px-4 py-8">
-        <header className="text-center mb-12">
+        <header className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
             GCS Static File Proxy
           </h1>
@@ -79,60 +82,69 @@ const Index = () => {
           </p>
         </header>
 
-        <div className="grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
-          {/* Input Form */}
-          <Card className="p-6 shadow-soft">
-            <FileProxyForm 
-              onSubmit={handleProxyRequest} 
-              isLoading={isLoading}
-            />
-          </Card>
-
-          {/* Content Display */}
-          <Card className="p-6 shadow-soft">
-            <ContentViewer 
-              content={fetchedContent}
-              error={error}
-              isLoading={isLoading}
-            />
-          </Card>
-        </div>
-
-        {/* Info Section */}
-        <div className="mt-16 text-center">
-          <Card className="p-8 max-w-4xl mx-auto bg-accent/50 border-accent">
-            <h2 className="text-2xl font-semibold mb-4">How it works</h2>
-            <div className="grid md:grid-cols-3 gap-6 text-sm">
-              <div>
-                <div className="w-12 h-12 bg-primary text-primary-foreground rounded-lg flex items-center justify-center mx-auto mb-3 text-xl font-bold">
-                  1
-                </div>
-                <h3 className="font-semibold mb-2">Enter Details</h3>
-                <p className="text-muted-foreground">
-                  Provide the bucket name and file path you want to access
-                </p>
-              </div>
-              <div>
-                <div className="w-12 h-12 bg-primary text-primary-foreground rounded-lg flex items-center justify-center mx-auto mb-3 text-xl font-bold">
-                  2
-                </div>
-                <h3 className="font-semibold mb-2">Fetch Content</h3>
-                <p className="text-muted-foreground">
-                  The app constructs the GCS URL and fetches your static files
-                </p>
-              </div>
-              <div>
-                <div className="w-12 h-12 bg-primary text-primary-foreground rounded-lg flex items-center justify-center mx-auto mb-3 text-xl font-bold">
-                  3
-                </div>
-                <h3 className="font-semibold mb-2">Display Result</h3>
-                <p className="text-muted-foreground">
-                  View HTML, CSS, JS, or other static content directly in the browser
-                </p>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8">
+            <TabsTrigger value="request">File Request</TabsTrigger>
+            <TabsTrigger value="content">Content</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="request" className="mt-0">
+            <div className="max-w-2xl mx-auto">
+              <Card className="p-6 shadow-soft">
+                <FileProxyForm 
+                  onSubmit={handleProxyRequest} 
+                  isLoading={isLoading}
+                />
+              </Card>
+              
+              {/* Info Section */}
+              <div className="mt-8">
+                <Card className="p-8 bg-accent/50 border-accent">
+                  <h2 className="text-2xl font-semibold mb-4 text-center">How it works</h2>
+                  <div className="grid md:grid-cols-3 gap-6 text-sm">
+                    <div>
+                      <div className="w-12 h-12 bg-primary text-primary-foreground rounded-lg flex items-center justify-center mx-auto mb-3 text-xl font-bold">
+                        1
+                      </div>
+                      <h3 className="font-semibold mb-2">Enter Details</h3>
+                      <p className="text-muted-foreground">
+                        Provide the bucket name and file path you want to access
+                      </p>
+                    </div>
+                    <div>
+                      <div className="w-12 h-12 bg-primary text-primary-foreground rounded-lg flex items-center justify-center mx-auto mb-3 text-xl font-bold">
+                        2
+                      </div>
+                      <h3 className="font-semibold mb-2">Fetch Content</h3>
+                      <p className="text-muted-foreground">
+                        The app constructs the GCS URL and fetches your static files
+                      </p>
+                    </div>
+                    <div>
+                      <div className="w-12 h-12 bg-primary text-primary-foreground rounded-lg flex items-center justify-center mx-auto mb-3 text-xl font-bold">
+                        3
+                      </div>
+                      <h3 className="font-semibold mb-2">Display Result</h3>
+                      <p className="text-muted-foreground">
+                        View HTML, CSS, JS, or other static content directly in the browser
+                      </p>
+                    </div>
+                  </div>
+                </Card>
               </div>
             </div>
-          </Card>
-        </div>
+          </TabsContent>
+          
+          <TabsContent value="content" className="mt-0">
+            <div className="w-full h-[calc(100vh-200px)]">
+              <ContentViewer 
+                content={fetchedContent}
+                error={error}
+                isLoading={isLoading}
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
